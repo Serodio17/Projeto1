@@ -43,41 +43,6 @@ int main ()
                     printf("Escolha uma opcao:____");
                     scanf("%d", &opcaoPortugues);
 
-                    switch (opcaoPortugues)
-                    {
-                        case 1:
-                            int TipoCalculo;
-                            float R1, R2, R3, R4, R5, R6, R7;
-                            
-                            printf("Qual calculo deseja efetuar? \n");
-                            printf("1- Resistencias em Serie \n");
-                            printf("2- Resistencias em paralelo \n");
-                            break;
-                        
-                        default:
-                            printf("Opçao invalida, Tenta Outra vez.");
-                            break;
-                    }
                 }
-                
-            
-            break;
-        
-        case 2:
-            printf("You selected the english menu \n");
-            //mostrar opçoes 
-            //dar a escolher
-            break;
-
-        case 3:
-            printf("Encerrando a aplicaçao, Ate logo!");
-            break;
-        
-        default:
-            printf("Opçao Invalida, Tenta outra vez");
-            break;
     }
-
-
-
 }
