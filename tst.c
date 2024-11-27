@@ -33,7 +33,7 @@ float RParalelo(float resistencia[], int n)
 int main()
 {
     // Declarar variáveis para menu principal
-    int opcao, opcaoPortugues;
+    int opcao, opcaoPortugues,opcaoIngles;
 
     // Mensagem de boas-vindas ao utilizador
     printf("Bem-vindo(a) à nossa aplicação de Cálculos Elétricos \n");
