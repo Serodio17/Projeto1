@@ -75,7 +75,6 @@ int main()
         printf("-------- MENU EM PORTUGUES -------- \n");
         printf("1- Calcular resistencias em serie ou paralelo \n");
         printf("2- Descobrir valores de resistencias atraves do codigo cores \n");
-        scanf("%d", &CodigoR);
         printf("3- Descobrir codigo de cores atraves de resistencias \n");
         printf("4- Lei das Malhas e nos\n");
         printf("5- Teorema de Norton\n");
@@ -234,4 +233,5 @@ int main()
     }
 
     return 0;
+    }
 }
