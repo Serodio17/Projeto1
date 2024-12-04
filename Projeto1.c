@@ -1,4 +1,21 @@
 #include <stdio.h>
+#include<string.h>
+
+//funçao para codigo de cores
+int obterValorCor(char cor[]) 
+{
+    if (strcmp(cor, "preto") == 0) return 0;
+    if (strcmp(cor, "castanho") == 0) return 1;
+    if (strcmp(cor, "vermelho") == 0) return 2;
+    if (strcmp(cor, "laranja") == 0) return 3;
+    if (strcmp(cor, "amarelo") == 0) return 4;
+    if (strcmp(cor, "verde") == 0) return 5;
+    if (strcmp(cor, "azul") == 0) return 6;
+    if (strcmp(cor, "roxo") == 0) return 7;
+    if (strcmp(cor, "cinza") == 0) return 8;
+    if (strcmp(cor, "branco") == 0) return 9;
+    return -1; // Cor inválida
+}
 
 // Função para calcular resistência em série
 float RSerie(float resistencia[], int n)
@@ -36,10 +53,10 @@ int main()
     int opcao, opcaoPortugues;
 
     // Mensagem de boas-vindas ao utilizador
-    printf("Bem-vindo(a) à nossa aplicação de Cálculos Elétricos \n");
+    printf("---Bem-vindo(a) à nossa aplicação de Calculos Eletricos---\n");
 
     // Apresentar opções de menu
-    printf("1- Menu em Português \n");
+    printf("1- Menu em Portugues \n");
     printf("2- English Menu \n");
     printf("3- Sair \n");
 
@@ -51,10 +68,14 @@ int main()
     switch (opcao)
     {
     case 1:
+    {
+        int CodigoR;
+
         // Mostrar opções em português
-        printf("-------- MENU EM PORTUGUÊS -------- \n");
+        printf("-------- MENU EM PORTUGUES -------- \n");
         printf("1- Calcular resistencias em serie ou paralelo \n");
-        printf("2- Descobrir valores de resistencias atraves de cores \n");
+        printf("2- Descobrir valores de resistencias atraves do codigo cores \n");
+        scanf("%d", &CodigoR);
         printf("3- Descobrir codigo de cores atraves de resistencias \n");
         printf("4- Lei das Malhas e nos\n");
         printf("5- Teorema de Norton\n");
@@ -63,7 +84,7 @@ int main()
         printf("8- Dimensionar dijuntores\n");
         printf("9- Direcionar seccao de cabos eletricos\n");
         printf("10- Voltar ao Menu Principal \n");
-        printf("Escolha uma opção: ");
+        printf("Escolha uma opçao: ");
         scanf("%d", &opcaoPortugues);
 
         switch (opcaoPortugues)
@@ -72,27 +93,27 @@ int main()
         {
             int n, CalculoR;
 
-            printf("----- Calculadora de Resistências -----\n");
-            printf("1- Cálculo de Resistências em Série\n");
-            printf("2- Cálculo de Resistências em Paralelo\n");
-            printf("Escolha uma opção: ");
+            printf("----- Calculadora de Resistencias -----\n");
+            printf("1- Calculo de Resistencias em Serie\n");
+            printf("2- Calculo de Resistencias em Paralelo\n");
+            printf("Escolha uma opçao: ");
             scanf("%d", &CalculoR);
 
             // Ler o número de resistências
-            printf("Quantas resistências deseja calcular? ");
+            printf("Quantas resistencias deseja calcular? ");
             scanf("%d", &n);
 
             // Validar número de resistências
             if (n <= 0)
             {
-                printf("O número de resistências deve ser maior que zero.\n");
+                printf("O número de resistencias deve ser maior que zero.\n");
                 break;
             }
 
             float resistencia[n];
             for (int i = 0; i < n; i++)
             {
-                printf("Digite o valor da resistência %d (em ohms): ", i + 1);
+                printf("Digite o valor da resistencia %d (em ohms): ", i + 1);
                 scanf("%f", &resistencia[i]);
             }
 
@@ -102,7 +123,7 @@ int main()
             {
                 printf("-----Calculo em Serie-----\n");
                 float resultadoSerie = RSerie(resistencia, n);
-                printf("O valor total da resistência em série é: %.2f ohms\n", resultadoSerie);
+                printf("O valor total da resistencia em série e: %.2f ohms\n", resultadoSerie);
                 break;
             }
             case 2:
@@ -110,19 +131,54 @@ int main()
                 printf("-----Calculo em Paralelo-----\n");
                 float resultadoParalelo = RParalelo(resistencia, n);
                 if (resultadoParalelo != 0)
-                    printf("O valor total da resistência em paralelo é: %.2f ohms\n", resultadoParalelo);
+                    printf("O valor total da resistencia em paralelo é: %.2f ohms\n", resultadoParalelo);
                 else
-                    printf("Não foi possível calcular a resistência em paralelo devido a um valor inválido.\n");
+                    printf("Neo foi possivel calcular a resistencia em paralelo devido a um valor invalido.\n");
                 break;
             }
             default:
-                printf("Opção inválida.\n");
+                printf("Opção invalida.\n");
                 break;
             }
             break;
         }
+        
         case 2:
         {
+            int CodigoR;
+            char cor1[20], cor2[20], cor3[20], cor4[20];
+            int valor1, valor2, multiplicador;
+
+            switch (CodigoR)
+            {
+            case 1:
+                printf("Digite a primeira cor: ");
+            scanf("%s", cor1);
+            printf("Digite a segunda cor: ");
+            scanf("%s", cor2);
+            printf("Digite a terceira cor (multiplicador): ");
+            scanf("%s", cor3);
+
+            // Obter os valores das cores
+            valor1 = obterValorCor(cor1);
+            valor2 = obterValorCor(cor2);
+            multiplicador = obterValorCor(cor3);
+
+            if (valor1 == -1 || valor2 == -1 || multiplicador == -1) {
+                printf("Cor inválida!\n");
+                return 1;
+            }
+
+            // Calcular o valor da resistência
+            long resistencia = (valor1 * 10 + valor2) * (1 << multiplicador); // Multiplicador em base de 2 (potência de 10)
+
+            printf("O valor da resistência é: %ld ohms\n", resistencia);
+
+                break;
+            default:
+                break;
+            }
+
             break;
         }
         case 3:
@@ -169,11 +225,11 @@ int main()
         break;
 
     case 3:
-        printf("Saindo... Obrigado por usar nossa aplicação!\n");
+        printf("Saindo... Obrigado por usar nossa aplicacao!\n");
         break;
 
     default:
-        printf("Opção inserida inválida.\n");
+        printf("Opção inserida invalida.\n");
         break;
     }
 
