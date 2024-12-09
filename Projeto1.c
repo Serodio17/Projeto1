@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include<string.h>
+#include<math.h>
 
 //funçao para codigo de cores
 int obterValorCor(char cor[]) 
@@ -69,7 +70,7 @@ int main()
     {
     case 1:
     {
-        int CodigoR;
+        
 
         // Mostrar opções em português
         printf("-------- MENU EM PORTUGUES -------- \n");
@@ -132,7 +133,7 @@ int main()
                 if (resultadoParalelo != 0)
                     printf("O valor total da resistencia em paralelo é: %.2f ohms\n", resultadoParalelo);
                 else
-                    printf("Neo foi possivel calcular a resistencia em paralelo devido a um valor invalido.\n");
+                    printf("Nao foi possivel calcular a resistencia em paralelo devido a um valor invalido.\n");
                 break;
             }
             default:
@@ -144,44 +145,53 @@ int main()
         
         case 2:
         {
-            int CodigoR;
-            char cor1[20], cor2[20], cor3[20], cor4[20];
-            int valor1, valor2, multiplicador;
-
-            switch (CodigoR)
-            {
-            case 1:
-                printf("Digite a primeira cor: ");
+            char cor1[20], cor2[20], cor3[20];
+            printf("-----Codigo de Cores----- \n");
+            printf("Digite a primeira cor: ");
             scanf("%s", cor1);
             printf("Digite a segunda cor: ");
             scanf("%s", cor2);
             printf("Digite a terceira cor (multiplicador): ");
             scanf("%s", cor3);
 
-            // Obter os valores das cores
-            valor1 = obterValorCor(cor1);
-            valor2 = obterValorCor(cor2);
-            multiplicador = obterValorCor(cor3);
+            int valor1 = obterValorCor(cor1);
+            int valor2 = obterValorCor(cor2);
+            int multiplicador = obterValorCor(cor3);
 
-            if (valor1 == -1 || valor2 == -1 || multiplicador == -1) {
-                printf("Cor inválida!\n");
-                return 1;
+            if (valor1 == -99 || valor2 == -99 || multiplicador == -99) 
+            {
+                printf("Uma ou mais cores são inválidas.\n");
+            } 
+            else 
+            {    
+                double resistencia = (valor1 * 10 + valor2) * pow(10, multiplicador);
+                printf("O valor da resistência é: %.2f ohms\n", resistencia);
+
+                if (resistencia >= 1000)
+                {
+                    printf("Ovalor da resistencia é: %1f K ohms \n", resistencia);
+                }
+                if (resistencia >= 1000000)
+                {
+                   printf("Ovalor da resistencia é: %1f M ohms \n", resistencia);
+                }
+                
             }
-
-            // Calcular o valor da resistência
-            long resistencia = (valor1 * 10 + valor2) * (1 << multiplicador); // Multiplicador em base de 2 (potência de 10)
-
-            printf("O valor da resistência é: %ld ohms\n", resistencia);
-
-                break;
-            default:
-                break;
-            }
-
             break;
         }
-        case 3:
+        case 3: 
         {
+            long resistencia;
+            printf("-----codigo de cores----- \n");
+            printf("Digite o valor da resistência (em ohms): ");
+            scanf("%ld", &resistencia);
+
+            char codigo[4][20];
+            obterCodigoCores(resistencia, codigo);
+            printf("O código de cores para esta resistência é: %s %s %s\n", codigo[0], codigo[1], codigo[2]);
+            break;
+        }
+        default:
             break;
         }
         case 4:
@@ -227,11 +237,7 @@ int main()
         printf("Saindo... Obrigado por usar nossa aplicacao!\n");
         break;
 
-    default:
-        printf("Opção inserida invalida.\n");
-        break;
     }
 
     return 0;
     }
-}
