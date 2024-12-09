@@ -1,0 +1,60 @@
+#include <stdio.h>
+
+int main() {
+    int escolha;
+    float V, I, R;
+
+    printf("Bem-vindo ao calculador da Lei de Ohm!\n");
+    printf("Escolha o que você deseja calcular:\n");
+    printf("1 - Calcular Tensão (V)\n");
+    printf("2 - Calcular Corrente (I)\n");
+    printf("3 - Calcular Resistência (R)\n");
+    printf("Digite sua escolha (1/2/3): ");
+    scanf("%d", &escolha);
+
+    switch(escolha) {
+        case 1:
+            // Calcular Tensão (V)
+            printf("Digite a corrente (I) em Amperes: ");
+            scanf("%f", &I);
+            printf("Digite a resistência (R) em Ohms: ");
+            scanf("%f", &R);
+            V = I * R;
+            printf("A Tensão (V) é: %.2f Volts\n", V);
+            break;
+
+        case 2:
+            // Calcular Corrente (I)
+            printf("Digite a tensão (V) em Volts: ");
+            scanf("%f", &V);
+            printf("Digite a resistência (R) em Ohms: ");
+            scanf("%f", &R);
+            if (R != 0) {
+                I = V / R;
+                printf("A Corrente (I) é: %.2f Amperes\n", I);
+            } else {
+                printf("Erro: A resistência não pode ser zero.\n");
+            }
+            break;
+
+        case 3:
+            // Calcular Resistência (R)
+            printf("Digite a tensão (V) em Volts: ");
+            scanf("%f", &V);
+            printf("Digite a corrente (I) em Amperes: ");
+            scanf("%f", &I);
+            if (I != 0) {
+                R = V / I;
+                printf("A Resistência (R) é: %.2f Ohms\n", R);
+            } else {
+                printf("Erro: A corrente não pode ser zero.\n");
+            }
+            break;
+
+        default:
+            printf("Opção inválida. Tente novamente.\n");
+            break;
+    }
+
+    return 0;
+}
