@@ -1,21 +1,48 @@
 #include <stdio.h>
-#include<string.h>
-#include<math.h>
+#include <string.h>
+#include <math.h>
 
-//funçao para codigo de cores
-int obterValorCor(char cor[]) 
+// funçao para codigo de cores
+int obterValorCor(char cor[])
 {
-    if (strcmp(cor, "preto") == 0) return 0;
-    if (strcmp(cor, "castanho") == 0) return 1;
-    if (strcmp(cor, "vermelho") == 0) return 2;
-    if (strcmp(cor, "laranja") == 0) return 3;
-    if (strcmp(cor, "amarelo") == 0) return 4;
-    if (strcmp(cor, "verde") == 0) return 5;
-    if (strcmp(cor, "azul") == 0) return 6;
-    if (strcmp(cor, "roxo") == 0) return 7;
-    if (strcmp(cor, "cinza") == 0) return 8;
-    if (strcmp(cor, "branco") == 0) return 9;
+    if (strcmp(cor, "preto") == 0)
+        return 0;
+    if (strcmp(cor, "castanho") == 0)
+        return 1;
+    if (strcmp(cor, "vermelho") == 0)
+        return 2;
+    if (strcmp(cor, "laranja") == 0)
+        return 3;
+    if (strcmp(cor, "amarelo") == 0)
+        return 4;
+    if (strcmp(cor, "verde") == 0)
+        return 5;
+    if (strcmp(cor, "azul") == 0)
+        return 6;
+    if (strcmp(cor, "roxo") == 0)
+        return 7;
+    if (strcmp(cor, "cinza") == 0)
+        return 8;
+    if (strcmp(cor, "branco") == 0)
+        return 9;
     return -1; // Cor inválida
+}
+
+// Função para obter o código de cores
+void obterCodigoCores(long resistencia, char codigo[4][20])
+{
+    int digito1 = resistencia / 10;
+    int digito2 = resistencia % 10;
+    int multiplicador = log10(resistencia) - 1;
+
+    char cores[10][20] = {
+        "preto", "castanho", "vermelho", "laranja",
+        "amarelo", "verde", "azul", "roxo",
+        "cinza", "branco"};
+
+    strcpy(codigo[0], cores[digito1]);
+    strcpy(codigo[1], cores[digito2]);
+    strcpy(codigo[2], cores[multiplicador]);
 }
 
 // Função para calcular resistência em série
@@ -42,10 +69,74 @@ float RParalelo(float resistencia[], int n)
         else
         {
             printf("A resistência %d não pode ser zero em paralelo.\n", i + 1);
-            return 0;  // Retorna 0 para indicar erro
+            return 0; // Retorna 0 para indicar erro
         }
     }
     return (resultado == 0.0) ? 0.0 : 1.0 / resultado;
+}
+
+// Função para resolver a Lei das Malhas
+void leiDasMalhas() 
+{
+    int n;
+    printf("Digite o número de malhas no circuito: ");
+    scanf("%d", &n);
+
+    if (n <= 0) {
+        printf("O número de malhas deve ser maior que zero.\n");
+        return;
+    }
+
+    float resistencias[n], tensoes[n], correntes[n];
+    for (int i = 0; i < n; i++) {
+        printf("Digite a resistência equivalente da malha %d (em ohms): ", i + 1);
+        scanf("%f", &resistencias[i]);
+        printf("Digite a tensão Total na malha %d (em volts): ", i + 1);
+        scanf("%f", &tensoes[i]);
+    }
+
+    printf("\n--- Resultados da Lei das Malhas ---\n");
+    for (int i = 0; i < n; i++) {
+        correntes[i] = tensoes[i] / resistencias[i];
+        printf("Corrente na malha %d: %.2f A\n", i + 1, correntes[i]);
+    }
+}
+
+// Função para resolver a Lei dos Nós
+void leiDosNos()
+{
+    int entradas, saidas;
+    float correnteEntrada = 0, correnteSaida = 0;
+
+    printf("Digite o número de correntes de entrada no nó: ");
+    scanf("%d", &entradas);
+    for (int i = 0; i < entradas; i++)
+    {
+        float corrente;
+        printf("Digite a corrente de entrada %d (em A): ", i + 1);
+        scanf("%f", &corrente);
+        correnteEntrada += corrente;
+    }
+
+    printf("Digite o número de correntes de saída do nó: ");
+    scanf("%d", &saidas);
+    for (int i = 0; i < saidas; i++)
+    {
+        float corrente;
+        printf("Digite a corrente de saída %d (em A): ", i + 1);
+        scanf("%f", &corrente);
+        correnteSaida += corrente;
+    }
+
+    printf("\n--- Resultados da Lei dos Nós ---\n");
+    if (fabs(correnteEntrada - correnteSaida) < 1e-6)
+    {
+        printf("O nó está equilibrado. Correntes de entrada e saída são iguais.\n");
+    }
+    else
+    {
+        printf("O nó NÃO está equilibrado. Diferença de corrente: %.2f A\n", correnteEntrada - correnteSaida);
+    }
 }
 
 int main()
@@ -70,7 +161,6 @@ int main()
     {
     case 1:
     {
-        
 
         // Mostrar opções em português
         printf("-------- MENU EM PORTUGUES -------- \n");
@@ -142,7 +232,7 @@ int main()
             }
             break;
         }
-        
+
         case 2:
         {
             char cor1[20], cor2[20], cor3[20];
@@ -158,28 +248,28 @@ int main()
             int valor2 = obterValorCor(cor2);
             int multiplicador = obterValorCor(cor3);
 
-            if (valor1 == -99 || valor2 == -99 || multiplicador == -99) 
+            if (valor1 == -99 || valor2 == -99 || multiplicador == -99)
             {
                 printf("Uma ou mais cores são inválidas.\n");
-            } 
-            else 
-            {    
+            }
+            else
+            {
+
                 double resistencia = (valor1 * 10 + valor2) * pow(10, multiplicador);
                 printf("O valor da resistência é: %.2f ohms\n", resistencia);
 
-                if (resistencia >= 1000)
-                {
-                    printf("Ovalor da resistencia é: %1f K ohms \n", resistencia);
-                }
                 if (resistencia >= 1000000)
                 {
-                   printf("Ovalor da resistencia é: %1f M ohms \n", resistencia);
+                    printf("Ovalor da resistencia é: %1f M ohms \n", resistencia / 1000000);
                 }
-                
+                else if (resistencia >= 1000)
+                {
+                    printf("Ovalor da resistencia é: %.2f K ohms \n", resistencia / 1000);
+                }
             }
             break;
         }
-        case 3: 
+        case 3:
         {
             long resistencia;
             printf("-----codigo de cores----- \n");
@@ -194,40 +284,58 @@ int main()
         default:
             break;
         }
-        case 4:
-        {
-            break;
-        }
-        case 5:
-        {
-            break;
-        }
-        case 6:
-        {
-            break;
-        }
-        case 7:
-        {
-            break;
-        }
-        case 8:
-        {
-            break;
-        }
-        case 9:
-        {
-            break;
-        }
-        case 10:
-        {
-            break;
-        }
-        default:
-            printf("Opção inválida.\n");
-            break;
+    case 4:
+    {
+        int opcaoLei;
+        printf("-----Qual opçao deseja?---- \n");
+        printf("1- Lei das Malhas\n");
+        printf("2- Lei dos Nós\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcaoLei);
 
+        switch (opcaoLei)
+        {
+        case 1:
+            leiDasMalhas();
+            break;
+        case 2:
+            leiDosNos();
+            break;
+        default:
+            printf("Opção inválida para a Lei das Malhas e Nós.\n");
+            break;
         }
         break;
+    }
+    case 5:
+    {
+        break;
+    }
+    case 6:
+    {
+        break;
+    }
+    case 7:
+    {
+        break;
+    }
+    case 8:
+    {
+        break;
+    }
+    case 9:
+    {
+        break;
+    }
+    case 10:
+    {
+        break;
+    }
+    default:
+        printf("Opção inválida.\n");
+        break;
+    }
+    break;
 
     case 2:
         printf("English menu is not implemented yet.\n");
@@ -236,8 +344,7 @@ int main()
     case 3:
         printf("Saindo... Obrigado por usar nossa aplicacao!\n");
         break;
-
     }
 
     return 0;
-    }
+}
