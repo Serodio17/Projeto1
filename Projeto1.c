@@ -138,6 +138,50 @@ void leiDosNos()
     }
 }
 
+//Desenhaar Onda sinosoidal
+#define PI 3.14159265358979323846
+
+void desenhar_onda_senoidal(float frequencia, float amplitude, int largura_terminal) {
+    int linhas = 21;                  // Número de linhas para representar a amplitude
+    int eixo_central = linhas / 2;    // Linha central representando o eixo X
+    char tela[linhas][largura_terminal]; // Matriz para armazenar o desenho da onda
+
+    // Inicializar a matriz com espaços
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < largura_terminal; j++) {
+            tela[i][j] = ' ';
+        }
+    }
+
+    // Desenhar o eixo X
+    for (int j = 0; j < largura_terminal; j++) {
+        tela[eixo_central][j] = '-';
+    }
+
+    // Ajustar frequência para caber no terminal
+    float ciclos_visiveis = 2; // Exibir 2 ciclos completos
+    float passo = (2 * PI * ciclos_visiveis) / largura_terminal;
+
+    // Gerar a onda senoidal
+    for (int x = 0; x < largura_terminal; x++) {
+        float valor = amplitude * sin(passo * x); // Calcular valor da função seno
+        int linha = eixo_central - (int)((valor * (linhas / 2 - 1)) / amplitude); // Mapear valor para a linha
+
+        // Garantir que o ponto da onda esteja dentro dos limites
+        if (linha >= 0 && linha < linhas) {
+            tela[linha][x] = '*';
+        }
+    }
+
+    // Imprimir a matriz no terminal
+    for (int i = 0; i < linhas; i++) {
+        for (int j = 0; j < largura_terminal; j++) {
+            printf("%c", tela[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 // Main function
 int main()
 {
@@ -309,6 +353,39 @@ int main()
         {
             printf("----- Gerador de Ondas -----\n");
             // Implementação específica deve ser feita aqui
+            float frequencia, amplitude;
+    int largura_terminal;
+
+    printf("----- Gerador de Onda Senoidal -----\n");
+    printf("Digite a frequência da onda (Hz, até 1000 kHz): ");
+    scanf("%f", &frequencia);
+    printf("Digite a amplitude da onda (V, até 220 V): ");
+    scanf("%f", &amplitude);
+    printf("Digite a largura do terminal (número de colunas): ");
+    scanf("%d", &largura_terminal);
+
+    // Limitar frequência e amplitude para valores máximos
+    if (frequencia > 1000000.0) {
+        printf("A frequência máxima permitida é 1000 kHz. Ajustando para 1000 kHz.\n");
+        frequencia = 1000000.0;
+    }
+    if (amplitude > 220.0) {
+        printf("A amplitude máxima permitida é 220 V. Ajustando para 220 V.\n");
+        amplitude = 220.0;
+    }
+    if (largura_terminal < 20) {
+        printf("A largura mínima do terminal é 20. Ajustando para 20.\n");
+        largura_terminal = 20;
+    }
+
+    // Ajustar a frequência para visualização se muito alta
+    if (frequencia > 10.0) {
+        printf("Frequência muito alta! Reduzindo para escala visual.\n");
+        frequencia = 10.0; // Escala a frequência para ser legível
+    }
+
+    desenhar_onda_senoidal(frequencia, amplitude, largura_terminal);
+
             break;
         }
 
