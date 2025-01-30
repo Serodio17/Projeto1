@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gráfico de Onda Senoidal</title>
+    <style>
+        canvas { border: 1px solid black; }
+    </style>
+</head>
+<body>
+    <h1>Gráfico de Onda Senoidal</h1>
+    <canvas id="senoidal" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('senoidal');
+        const ctx = canvas.getContext('2d');
+        const largura = canvas.width;
+        const altura = canvas.height;
+        const eixoX = altura / 2;
+        const amplitude = 50.000000;
+        const frequencia = 1.000000;
+        const ciclosVisiveis = 2;
+        const passo = (2 * Math.PI * ciclosVisiveis) / largura;
+        ctx.beginPath();
+        ctx.moveTo(0, eixoX);
+        ctx.lineTo(largura, eixoX);
+        ctx.strokeStyle = 'black';
+        ctx.stroke();
+        ctx.beginPath();
+        for (let x = 0; x < largura; x++) {
+            const y = eixoX - (amplitude * Math.sin(passo * x) * (altura / 4));
+            if (x === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = 'blue';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    </script>
+</body>
+</html>
