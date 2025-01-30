@@ -13,13 +13,13 @@ int main()
     int opcao;
 
     // Mensagem de boas-vindas
-    printf("---Bem-vindo(a) à nossa aplicação de Cálculos Elétricos---\n");
+    printf("---Bem-vindo(a) a nossa aplicacao de Calculos Eletricos---\n");
 
     // Menu principal
     printf("1- Menu em Portugues \n");
     printf("2- English Menu \n");
     printf("3- Sair \n");
-    printf("Digite a opção desejada: ");
+    printf("Digite a opcao desejada: ");
     scanf("%d", &opcao);
 
     if (opcao==1) {
@@ -30,6 +30,6 @@ int main()
         printf("Obrigado por usar o programa!\n");
         printf("Thank you for using the program!\n");
     } else{
-        printf("Opção inválida.\nInvalid option.\n");
+        printf("Opcao invalida.\nInvalid option.\n");
     }
 }
