@@ -2,17 +2,17 @@
 #include <string.h>
 #include <math.h>
 
-#define RESISTIVIDADE_COBRE 0.0172    // Ω·mm²/m
-#define RESISTIVIDADE_ALUMINIO 0.0282 // Ω·mm²/m
+#define RESISTIVIDADE_COBRE 0.0172    // Ω·mm2/m
+#define RESISTIVIDADE_ALUMINIO 0.0282 // Ω·mm2/m
 
-// Standard cable sizes in mm²
-float tamanhos_padrao[] = {0.5, 0.75, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2500};
+// Standard cable sizes in mm2
+double tamanhos_padrao[] = {0.5, 0.75, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2500};
 int num_tamanhos = sizeof(tamanhos_padrao) / sizeof(tamanhos_padrao[0]);
 
-float calcular_tamanho_cabo(float corrente, float comprimento, float queda_tensao_permitida, int material, float *tamanho_padrao)
+double calcular_tamanho_cabo(double corrente, double comprimento, double queda_tensao_permitida, int material, double *tamanho_padrao)
 {
-    float resistividade = (material == 1) ? RESISTIVIDADE_COBRE : RESISTIVIDADE_ALUMINIO;
-    float tamanho_requerido = (2 * resistividade * comprimento * corrente) / queda_tensao_permitida; // mm²
+    double resistividade = (material == 1) ? RESISTIVIDADE_COBRE : RESISTIVIDADE_ALUMINIO;
+    double tamanho_requerido = (2 * resistividade * comprimento * corrente) / queda_tensao_permitida; // mm2
 
     // Find the smallest standard cable size that meets the requirement
     for (int i = 0; i < num_tamanhos; i++)
@@ -20,11 +20,11 @@ float calcular_tamanho_cabo(float corrente, float comprimento, float queda_tensa
         if (tamanhos_padrao[i] >= tamanho_requerido)
         {
             *tamanho_padrao = tamanhos_padrao[i];
-            return tamanho_requerido; // Return the exact calculated size
+            return tamanho_requerido;
         }
     }
 
-    *tamanho_padrao = -1; // Indicate that no suitable size was found
+    *tamanho_padrao = tamanhos_padrao[num_tamanhos - 1]; // Use the largest available size
     return tamanho_requerido;
 }
 
@@ -36,71 +36,82 @@ void toLowercase(char *str)
         str[i] = tolower(str[i]);
     }
 }
-// Função para obter o valor da cor
+// Funçao para obter o valor da cor
 int obterValorCor(char cor[])
 {
     // Convert input color to lowercase for case-insensitive comparison
     toLowercase(cor);
 
-    if (strcmp(cor, "black") == 0)
+    if (strcmp(cor, "preto") == 0)
         return 0;
-    if (strcmp(cor, "brown") == 0)
+    if (strcmp(cor, "castanho") == 0)
         return 1;
-    if (strcmp(cor, "red") == 0)
+    if (strcmp(cor, "vermelho") == 0)
         return 2;
-    if (strcmp(cor, "orange") == 0)
+    if (strcmp(cor, "laranja") == 0)
         return 3;
-    if (strcmp(cor, "yellow") == 0)
+    if (strcmp(cor, "amarelo") == 0)
         return 4;
-    if (strcmp(cor, "green") == 0)
+    if (strcmp(cor, "verde") == 0)
         return 5;
-    if (strcmp(cor, "blue") == 0)
+    if (strcmp(cor, "azul") == 0)
         return 6;
-    if (strcmp(cor, "purple") == 0)
+    if (strcmp(cor, "violeta") == 0)
         return 7;
-    if (strcmp(cor, "grey") == 0)
+    if (strcmp(cor, "cinzento") == 0)
         return 8;
-    if (strcmp(cor, "white") == 0)
+    if (strcmp(cor, "branco") == 0)
         return 9;
 
     return -1; // Invalid color
 }
 
-// Função para obter o código de cores de uma resistência
-void obterCodigoCores(long resistencia, char codigo[4][20])
+// Funçao para obter o codigo de cores de uma resistencia
+int obterCodigoCores(long resistencia, char codigo[3][20])
 {
     if (resistencia <= 0)
     {
-        printf("Invalid resistance value. It must be positive.\n");
-        return;
+        printf("Valor de resistencia invalido. Deve ser positivo.\n");
+        return -1;
     }
 
-    int num_digits = log10(resistencia) + 1;
+    // Calculate number of digits using integer arithmetic
+    long temp = resistencia;
+    int num_digits = 0;
+    while (temp != 0)
+    {
+        temp /= 10;
+        num_digits++;
+    }
 
     if (num_digits < 2 || num_digits > 6)
     {
-        printf("Resistance value out of range for standard color codes.\n");
-        return;
+        printf("Valor de resistencia fora da faixa (10-999999 ohms).\n");
+        return -1;
     }
 
-    // Extract first and second digits
-    int digito1 = (resistencia / (long)pow(10, num_digits - 1)) % 10; // First digit
-    int digito2 = (resistencia / (long)pow(10, num_digits - 2)) % 10; // Second digit
+    // Calculate divisors using integer arithmetic
+    long divisor1 = 1, divisor2 = 1;
+    for (int i = 0; i < num_digits - 1; i++)
+        divisor1 *= 10;
+    for (int i = 0; i < num_digits - 2; i++)
+        divisor2 *= 10;
 
-    // Multiplier
-    int multiplicador = num_digits - 2;
+    int digito1 = (resistencia / divisor1) % 10;
+    int digito2 = (resistencia / divisor2) % 10;
 
-    char cores[10][20] = {
-        "black", "brown", "red", "orange",
-        "yellow", "green", "blue", "purple",
-        "grey", "white"};
+    char cores_digitos[10][20] = {
+        "preto", "castanho", "vermelho", "laranja", "amarelo",
+        "verde", "azul", "violeta", "cinzento", "branco"};
 
-    strcpy(codigo[0], cores[digito1]);
-    strcpy(codigo[1], cores[digito2]);
-    strcpy(codigo[2], cores[multiplicador]);
+    strcpy(codigo[0], cores_digitos[digito1]);
+    strcpy(codigo[1], cores_digitos[digito2]);
+    strcpy(codigo[2], cores_digitos[num_digits - 2]);
+
+    return 0;
 }
 
-// Função para calcular resistência em série
+// Funçao para calcular resistencia em serie
 float RSerie(float resistencia[], int n)
 {
     float resultado = 0;
@@ -111,7 +122,7 @@ float RSerie(float resistencia[], int n)
     return resultado;
 }
 
-// Função para calcular resistência em paralelo
+// Funçao para calcular resistencia em paralelo
 float RParalelo(float resistencia[], int n)
 {
     float resultado = 0;
@@ -123,84 +134,136 @@ float RParalelo(float resistencia[], int n)
         }
         else
         {
-            printf("The resistance %d cannot be zero in parallel.\n", i + 1);
+            printf("A resistencia %d nao pode ser zero em paralelo.\n", i + 1);
             return 0; // Retorna 0 para indicar erro
         }
     }
     return (resultado == 0.0) ? 0.0 : 1.0 / resultado;
 }
 
-// Função para resolver a Lei das Malhas
+// Funçao para resolver a Lei das Malhas
 void leiDasMalhas()
 {
     int n;
-    printf("Enter the number of meshes in the circuit: ");
+    printf("Digite o numero de malhas no circuito: ");
     scanf("%d", &n);
 
     if (n <= 0)
     {
-        printf("The number of meshes must be greater than zero.\n");
+        printf("O numero de malhas deve ser maior que zero.\n");
         return;
     }
 
-    float resistencias[n], tensoes[n], correntes[n];
-    for (int i = 0; i < n; i++)
+    float *resistencias = (float *)malloc(n * sizeof(float));
+    float *tensoes = (float *)malloc(n * sizeof(float));
+    float *correntes = (float *)malloc(n * sizeof(float));
+
+    if (resistencias == NULL || tensoes == NULL || correntes == NULL)
     {
-        printf("Enter the equivalent resistance of the mesh %d (in ohms): ", i + 1);
-        scanf("%f", &resistencias[i]);
-        printf("Enter the total voltage in the mesh %d (in volts): ", i + 1);
-        scanf("%f", &tensoes[i]);
+        printf("Falha na alocaçao de memoria.\n");
+        return;
     }
 
-    printf("\n--- Results of the Law of Meshes ---\n");
+    for (int i = 0; i < n; i++)
+    {
+        printf("Insira a resistencia equivalente da malha %d (em ohms): ", i + 1);
+        scanf("%f", &resistencias[i]);
+        if (resistencias[i] <= 0)
+        {
+            printf("A resistencia deve ser maior que zero.\n");
+            free(resistencias);
+            free(tensoes);
+            free(correntes);
+            return;
+        }
+
+        printf("Insira a tensao total na malha %d (em volts): ", i + 1);
+        scanf("%f", &tensoes[i]);
+        if (tensoes[i] < 0)
+        {
+            printf("A tensao nao pode ser negativa.\n");
+            free(resistencias);
+            free(tensoes);
+            free(correntes);
+            return;
+        }
+    }
+
+    printf("\n--- Resultados da Lei das Malhas ---\n");
     for (int i = 0; i < n; i++)
     {
         correntes[i] = tensoes[i] / resistencias[i];
-        printf("Current in the mesh %d: %.2f A\n", i + 1, correntes[i]);
+        printf("Corrente na malha %d: %.2f A\n", i + 1, correntes[i]);
     }
+
+    free(resistencias);
+    free(tensoes);
+    free(correntes);
 }
 
-// Função para resolver a Lei dos Nós
+// Funçao para resolver a Lei dos Nos
 void leiDosNos()
 {
     int entradas, saidas;
     float correnteEntrada = 0, correnteSaida = 0;
 
-    printf("Enter the number of input currents in the node: ");
+    printf("Digite o numero de correntes de entrada no no: ");
     scanf("%d", &entradas);
+    if (entradas < 0)
+    {
+        printf("O numero de correntes de entrada nao pode ser negativo.\n");
+        return;
+    }
+
     for (int i = 0; i < entradas; i++)
     {
         float corrente;
-        printf("Enter the input current %d (in A): ", i + 1);
+        printf("Introduza a corrente de entrada %d (em A): ", i + 1);
         scanf("%f", &corrente);
+        if (corrente < 0)
+        {
+            printf("Corrente nao pode ser negativa.\n");
+            return;
+        }
         correnteEntrada += corrente;
     }
 
-    printf("Enter the number of output currents from the node: ");
+    printf("Introduza o numero de correntes de saida do no: ");
     scanf("%d", &saidas);
+    if (saidas < 0)
+    {
+        printf("O numero de correntes de saida nao pode ser negativo.\n");
+        return;
+    }
+
     for (int i = 0; i < saidas; i++)
     {
         float corrente;
-        printf("Enter the output current %d (in A): ", i + 1);
+        printf("Introduza a corrente de saida %d (em A): ", i + 1);
         scanf("%f", &corrente);
+        if (corrente < 0)
+        {
+            printf("A corrente nao pode ser negativa.\n");
+            return;
+        }
         correnteSaida += corrente;
     }
 
-    printf("\n--- Results of the Law of Nodes ---\n");
+    printf("\n--- Resultados da Lei dos Nos ---\n");
     if (fabs(correnteEntrada - correnteSaida) < 1e-6)
     {
-        printf("The node is balanced. Input and output currents are equal.\n");
+        printf("O no e balanceado. As correntes de entrada e saida sao iguais.\n");
     }
     else
     {
-        printf("The node is NOT balanced. Current difference: %.2f A\n", correnteEntrada - correnteSaida);
+        printf("O no nao esta balanceado. Diferença atual: %.2f A\n", correnteEntrada - correnteSaida);
     }
 }
 
-// Desenhaar Onda sinosoidal
+// Desenhar Onda sinosoidal e quadrada
 #define PI 3.14159265358979323846
 
-void generate_wave_svg(float frequency, float amplitude, const char *file_name, int wave_type)
+void generate_wave_svg(float frequency, float amplitude, float offset, const char *file_name, int wave_type)
 {
     int width = 800;  // Fixed width of the SVG
     int height = 400; // Height of the SVG
@@ -219,7 +282,7 @@ void generate_wave_svg(float frequency, float amplitude, const char *file_name, 
     FILE *file = fopen(file_name, "w");
     if (file == NULL)
     {
-        printf("Error opening the file for writing.\n");
+        printf("Erro ao abrir o arquivo para gravaçao.\n");
         return;
     }
 
@@ -269,6 +332,15 @@ void generate_wave_svg(float frequency, float amplitude, const char *file_name, 
             // Square wave: alternate between +amplitude and -amplitude
             value = (current_time - floor(current_time / period) * period) < (period / 2) ? amplitude : -amplitude;
         }
+        else
+        {
+            printf("Tipo de onda invalido selecionado.\n");
+            fclose(file);
+            return;
+        }
+
+        // Apply the offset
+        value += offset;
 
         int y = center_axis - (int)((value * (height / 2 - 20)) / amplitude); // Map value to SVG height
         fprintf(file, "%d,%d ", x, y);
@@ -279,15 +351,16 @@ void generate_wave_svg(float frequency, float amplitude, const char *file_name, 
     fprintf(file, "</svg>\n");
     fclose(file);
 
-    printf("SVG file '%s' successfully generated.\n", file_name);
+    printf("Arquivo SVG '%s' gerado com sucesso.\n", file_name);
 }
 
-// Função secundária para cálculos do disjuntor
+// Funçao secundaria para calculos do disjuntor
+// Function to calculate breaker rating
 int calcular_disjuntor(int fase, double tensao, double potencia, double fp,
                        int tipo_carga, int carga_continua, double *corrente,
                        char *tipo_disjuntor)
 {
-    // Cálculo da corrente base
+    // Base current calculation
     if (fase == 1)
     {
         *corrente = potencia / (tensao * fp);
@@ -297,33 +370,36 @@ int calcular_disjuntor(int fase, double tensao, double potencia, double fp,
         *corrente = potencia / (sqrt(3) * tensao * fp);
     }
 
-    // Aplicar fator de carga contínua
+    // Continuous load factor
     if (carga_continua)
     {
         *corrente *= 1.25;
     }
 
-    // Aplicar fator de tipo de carga
+    // Load type adjustment
     switch (tipo_carga)
     {
-    case 1: // Carga resistiva
+    case 1: // Resistive load
         *corrente *= 1.0;
         strcpy(tipo_disjuntor, "B-Curve");
         break;
-    case 2: // Carga indutiva
+    case 2: // Inductive load
         *corrente *= 1.2;
         strcpy(tipo_disjuntor, "C-Curve");
         break;
-    case 3: // Motores
+    case 3: // Motors
         *corrente *= 2.0;
         strcpy(tipo_disjuntor, "D-Curve");
         break;
     default:
-        return -1; // Tipo de carga inválido
+        return -1; // Invalid load type
     }
 
-    // Encontrar disjuntor padrão
-    int tamanhos[] = {15, 20, 25, 30, 35, 40, 45, 50, 60, 70, 80, 90, 100, 125, 150, 175, 200, 225};
+    // Round current to avoid floating-point precision issues
+    *corrente = round(*corrente);
+
+    // Standard breaker sizes
+    int tamanhos[] = {1, 2, 3, 4, 6, 10, 13, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 300, 400, 500, 600, 630, 800, 1000, 1250, 1500, 1600, 2000, 2500, 3000, 3150, 3200, 4000, 5000, 6000, 6300};
     for (int i = 0; i < sizeof(tamanhos) / sizeof(tamanhos[0]); i++)
     {
         if (tamanhos[i] >= *corrente)
@@ -331,7 +407,33 @@ int calcular_disjuntor(int fase, double tensao, double potencia, double fp,
             return tamanhos[i];
         }
     }
-    return -2; // Acima de 200A
+    return -2; // Above 6300A
+}
+
+// Function to calculate Thevenin equivalent voltage and resistance
+// and Norton equivalent current and resistance
+void calculate_thevenin_and_norton(float voltages[], int num_sources, float resistances[], int num_resistances,
+                                   float *Vth, float *Rth, float *In, float *Rn)
+{
+    // Calculate Thevenin equivalent voltage (Vth)
+    *Vth = 0;
+    for (int i = 0; i < num_sources; i++)
+    {
+        *Vth += voltages[i]; // Summing up all voltages (simple case for linear voltage sources)
+    }
+
+    // Calculate Thevenin equivalent resistance (Rth)
+    *Rth = 0;
+    for (int i = 0; i < num_resistances; i++)
+    {
+        *Rth += resistances[i]; // Summing up all resistances (assuming series resistances)
+    }
+
+    // Calculate Norton current (In)
+    *In = *Vth / *Rth; // Norton current In = Vth / Rth
+
+    // Norton resistance is the same as Thevenin resistance
+    *Rn = *Rth;
 }
 
 // Main function
@@ -341,18 +443,18 @@ int main()
 
     do
     {
-        // Menu em Português
-        printf("-------- MENU IN ENGLISH -------- \n");
-        printf("1- Calculate resistances in series or parallel \n");
-        printf("2- Find out resistance values through color code \n");
-        printf("3- Discover color code through resistors \n");
-        printf("4- Law of Meshes and Nodes\n");
-        printf("5- Norton and Thevenin theorem\n");
-        printf("6- Wave generator \n");
-        printf("7- Dimensioning circuit breaker\n");
-        printf("8- Dimensioning electrical cable section\n");
-        printf("0- Exit\n");
-        printf("Choose an option: ");
+        // Menu em Portugues
+        printf("\n-------- MENU IN ENGLISH -------- \n");
+        printf("1- Calcular resistencias em serie ou paralelo \n");
+        printf("2- Descobrir valores de resistencia atraves do codigo de cores \n");
+        printf("3- Descubra o codigo de cor atraves de resistencias \n");
+        printf("4- Lei de Malhas e Nos\n");
+        printf("5- Teorema de Norton e Thevenin\n");
+        printf("6- Gerador de ondas \n");
+        printf("7- Dimensionamento do disjuntor\n");
+        printf("8- Dimensionamento da seçao do cabo eletrico\n");
+        printf("0- Sair\n");
+        printf("Escolha uma opçao: ");
         scanf("%d", &opcaoPortugues);
 
         switch (opcaoPortugues)
@@ -360,45 +462,45 @@ int main()
         case 1:
         {
             int n, CalculoR;
-            printf("----- Resistance Calculator -----\n");
-            printf("1- Calculation of Series Resistances\n");
-            printf("2- Calculation of Parallel Resistances\n");
-            printf("Choose an option: ");
+            printf("----- Calculadora de resistencia -----\n");
+            printf("1- Calculo de resistencias em serie\n");
+            printf("2- Calculo de resistencias paralelas\n");
+            printf("Escolha uma opçao: ");
             scanf("%d", &CalculoR);
 
-            printf("How many resistances do you want to calculate? ");
+            printf("Quantas resistencias voce quer calcular? ");
             scanf("%d", &n);
 
             if (n <= 0)
             {
-                printf("The number of resistors must be greater than zero.\n");
+                printf("O numero de resistencias deve ser maior que zero.\n");
                 break;
             }
 
             float resistencia[n];
             for (int i = 0; i < n; i++)
             {
-                printf("Enter the resistance value %d (in ohms): ", i + 1);
+                printf("Introduza o valor da resistencia %d (em ohms): ", i + 1);
                 scanf("%f", &resistencia[i]);
             }
 
             switch (CalculoR)
             {
             case 1:
-                printf("----- Serial calculation ----- \n");
+                printf("----- Calculo em serie ----- \n");
                 float resultadoSerie = RSerie(resistencia, n);
-                printf("The total value of the series resistance is: %.2f ohms\n", resultadoSerie);
+                printf("O valor total da resistencia de serie e: %.2f ohms\n", resultadoSerie);
                 break;
             case 2:
-                printf("----- Parallel Calculation -----\n");
+                printf("----- Calculo em paralelo -----\n");
                 float resultadoParalelo = RParalelo(resistencia, n);
                 if (resultadoParalelo != 0)
-                    printf("The total value of parallel resistance is: %.2f ohms\n", resultadoParalelo);
+                    printf("O valor total da resistencia paralela e: %.2f ohms\n", resultadoParalelo);
                 else
                     printf("Unable to calculate resistance in parallel due to an invalid value.\n");
                 break;
             default:
-                printf("Invalid option.\n");
+                printf("Opçao invalida.\n");
                 break;
             }
             break;
@@ -407,12 +509,12 @@ int main()
         case 2:
         {
             char cor1[20], cor2[20], cor3[20];
-            printf("----- Color code ----- \n");
-            printf("Enter the first color: ");
+            printf("----- Codigo de cores ----- \n");
+            printf("Digite a primeira cor: ");
             scanf("%s", cor1);
-            printf("Enter the second color: ");
+            printf("Digite a segunda cor: ");
             scanf("%s", cor2);
-            printf("Enter the third color (multiplier): ");
+            printf("Digite a terceira cor (multiplicador): ");
             scanf("%s", cor3);
 
             int valor1 = obterValorCor(cor1);
@@ -421,104 +523,162 @@ int main()
 
             if (valor1 == -1 || valor2 == -1 || multiplicador == -1)
             {
-                printf("Invalid color. Try again.\n");
+                printf("Cor invalida. Tente novamente.\n");
                 break;
             }
 
             long resistencia = (valor1 * 10 + valor2) * pow(10, multiplicador);
-            printf("The resistance value is: %ld ohms\n", resistencia);
+            printf("O valor da resistencia e: %ld ohms\n", resistencia);
             break;
         }
 
         case 3:
         {
             long resistencia;
-            char codigo[4][20];
+            char codigo[3][20];
 
-            printf("----- Discover the color code ----- \n");
-            printf("Enter the resistance value (in ohms): ");
+            printf("----- Descubra o codigo de cores ----- \n");
+            printf("Introduza o valor da resistencia (em ohms): ");
             scanf("%ld", &resistencia);
 
-            if (resistencia < 0)
+            if (obterCodigoCores(resistencia, codigo) == 0)
             {
-                printf("Invalid resistance. Try again.\n");
-                break;
+                printf("Codigo de cores: %s, %s, %s\n", codigo[0], codigo[1], codigo[2]);
+            }
+            else
+            {
+                printf("Entrada invalida\n");
             }
 
-            obterCodigoCores(resistencia, codigo);
-            printf("Color code: %s, %s, %s\n", codigo[0], codigo[1], codigo[2]);
             break;
         }
 
         case 4:
         {
-            printf("----- Law of Meshes and Nodes -----\n");
+            printf("----- Lei de Malhas e Nos -----\n");
             int tipo;
-            printf("Choice: 1 for Law of the Meshes, 2 for Law of the Nodes: ");
+            printf("Escolha: 1 para a Lei das Malhas, 2 para a Lei dos Nos: ");
             scanf("%d", &tipo);
+
             if (tipo == 1)
                 leiDasMalhas();
             else if (tipo == 2)
                 leiDosNos();
             else
-                printf("Invalid option.\n");
+                printf("Opçao invalida.\n");
+
             break;
         }
 
         case 5:
         {
-            printf("----- Norton and Thevenin theorem -----\n");
-            double tnR1, tnR2, tnVth, tnRth, tnIn;
+            int num_sources, num_resistances;
 
-            // Entrada de valores
-            printf("Enter the value of R1 (ohms): ");
-            scanf("%lf", &tnR1);
+            // Input the number of voltage sources and their values
+            printf("Introduza o numero de fontes de tensao: ");
+            scanf("%d", &num_sources);
+            float voltages[num_sources];
+            printf("Introduza as tensoes das fontes (em volts):\n");
+            for (int i = 0; i < num_sources; i++)
+            {
+                do
+                {
+                    printf("Tensao da fonte %d: ", i + 1);
+                    scanf("%f", &voltages[i]);
+                    if (voltages[i] <= 0)
+                    {
+                        printf("Por favor, insira um valor de tensao positivo.\n");
+                    }
+                } while (voltages[i] <= 0);
+            }
 
-            printf("Enter the value of R2 (ohms): ");
-            scanf("%lf", &tnR2);
+            // Input the number of resistances and their values
+            printf("Digite o numero de resistencias: ");
+            scanf("%d", &num_resistances);
+            float resistances[num_resistances];
+            printf("Digite as resistencias (em ohms):\n");
+            for (int i = 0; i < num_resistances; i++)
+            {
+                do
+                {
+                    printf("Resistencia %d: ", i + 1);
+                    scanf("%f", &resistances[i]);
+                    if (resistances[i] <= 0)
+                    {
+                        printf("Por favor, insira um valor de resistencia positivo.\n");
+                    }
+                } while (resistances[i] <= 0);
+            }
 
-            printf("Enter the value of the Thevenin voltage (V): ");
-            scanf("%lf", &tnVth);
+            // Variables to hold the results of Thevenin and Norton calculations
+            float Vth, Rth, In, Rn;
 
-            // Calculos
-            tnRth = (tnR1 * tnR2) / (tnR1 + tnR2);
-            tnIn = tnVth / tnRth;
+            // Call the function that calculates both Thevenin and Norton values
+            calculate_thevenin_and_norton(voltages, num_sources, resistances, num_resistances, &Vth, &Rth, &In, &Rn);
 
-            // Exibir resultado
-            printf("\nNorton Resistance : %.2f ohms\n", tnRth);
-            printf("Norton current: %.2f A\n", tnIn);
+            // Display the results
+            printf("\n---------------------------------------------");
+            printf("\nTensao equivalente de Thevenin (Vth): %.2f V\n", Vth);
+            printf("Resistencia equivalente de Thevenin (Rth): %.2f Ohms\n", Rth);
+            printf("\nCorrente equivalente de Norton (In): %.2f A\n", In);
+            printf("Resistencia equivalente de Norton (Rn): %.2f Ohms\n", Rn);
+            printf("---------------------------------------------\n");
             break;
         }
 
         case 6:
         {
-            float frequency, amplitude;
+            float frequency, amplitude, offset;
             int wave_type;
+            char file_name[100];
 
-            printf("Welcome to the oscilloscope simulator!\n");
-            printf("Enter the frequency of the wave (Hz, e.g., 50): ");
+            printf("Bem-vindo ao simulador de osciloscopio!\n");
+
+            // Get frequency and amplitude from the user
+            printf("Digite a frequencia da onda (Hz, por exemplo, 50): ");
             scanf("%f", &frequency);
-            printf("Enter the amplitude of the wave (Volts, e.g., 5.0): ");
-            scanf("%f", &amplitude);
-
-            printf("Choose the wave type (1 for Sine Wave, 2 for Square Wave): ");
-            scanf("%d", &wave_type);
-
-            if (wave_type == 1)
+            if (frequency <= 0)
             {
-                generate_wave_svg(frequency, amplitude, "sine_wave.svg", 1);
-            }
-            else if (wave_type == 2)
-            {
-                generate_wave_svg(frequency, amplitude, "square_wave.svg", 2);
-            }
-            else
-            {
-                printf("Invalid choice for wave type.\n");
+                printf("Erro: A frequencia deve ser um valor positivo nao zero.\n");
                 return 1;
             }
 
-            printf("Open the file '%s' in your browser to view the wave.\n", wave_type == 1 ? "sine_wave.svg" : "square_wave.svg");
+            printf("Digite a amplitude da onda (volts, por exemplo, 5.0): ");
+            scanf("%f", &amplitude);
+            if (amplitude <= 0)
+            {
+                printf("Erro: A amplitude deve ser um valor positivo nao zero.\n");
+                return 1;
+            }
+
+            // Get offset from the user
+            printf("Digite o deslocamento da onda (Volts, por exemplo, 1.0): ");
+            scanf("%f", &offset);
+
+            // Get wave type from the user
+            printf("Escolha o tipo de onda (1 para Onda senoidal, 2 para Onda Quadrada): ");
+            scanf("%d", &wave_type);
+
+            // Get file name from the user
+            printf("Insira o nome do arquivo de saida (por exemplo, wave.svg):");
+            scanf("%s", file_name);
+
+            // Generate the appropriate wave
+            if (wave_type == 1)
+            {
+                generate_wave_svg(frequency, amplitude, offset, file_name, 1);
+            }
+            else if (wave_type == 2)
+            {
+                generate_wave_svg(frequency, amplitude, offset, file_name, 2);
+            }
+            else
+            {
+                printf("Escolha invalida para tipo de onda.\n");
+                return 1;
+            }
+
+            printf("Abra o arquivo '%s' no seu navegador para visualizar a onda.\n", file_name);
 
             break;
         }
@@ -529,126 +689,151 @@ int main()
             double tensao, potencia, fp;
             char operacao_continua;
 
-            // Coleta de entradas
-            printf("Circuit Breaker Sizing Calculator\n");
+            // User input
+            printf("Calculadora de dimensionamento de disjuntores\n");
             printf("---------------------------------\n");
 
-            printf("1. System type (1-Single phase / 3-Three phase): ");
+            printf("1. Tipo de sistema (1-Monofasico / 3-Trifasico):");
             scanf("%d", &fase);
 
-            printf("2. Nominal voltage (V): ");
+            printf("2. Tensao nominal (V): ");
             scanf("%lf", &tensao);
 
-            printf("3. Total active power (kW): ");
+            printf("3. Potencia ativa total (kW): ");
             scanf("%lf", &potencia);
-            potencia *= 1000; // Converter para Watts
+            potencia *= 1000; // Convert to Watts
 
-            printf("4. Power factor (0.1-1.0): ");
+            printf("4. Fator de potencia (0,1-1,0): ");
             scanf("%lf", &fp);
 
-            printf("\nPredominant load type:\n");
-            printf("1. Resistive (lighting, heating)\n");
-            printf("2. Inductive (motors, transformers)\n");
-            printf("3. Large motors\n");
-            printf("Select (1-3): ");
+            printf("\nTipo de carga predominante:\n");
+            printf("1. Resistivo (iluminaçao, aquecimento)\n");
+            printf("2. Indutivo (motores, transformadores)\n");
+            printf("3. Motores grandes\n");
+            printf("Selecione (1-3): ");
             scanf("%d", &tipo_carga);
 
-            printf("\nContinuous operation (>3h)? (y/n): ");
-            scanf(" %c", &operacao_continua);
-            int carga_continua = (operacao_continua == 'y' || operacao_continua == 'Y');
+            printf("\nOperaçao continua (>3h)? (s/n): ");
+            getchar(); // Clear buffer before reading a character
+            scanf("%c", &operacao_continua);
+            int carga_continua = (operacao_continua == 's' || operacao_continua == 'S');
 
-            // Validações de entrada
+            // Input validation
             if (fase != 1 && fase != 3)
             {
-                printf("\nError: Invalid system type!\n");
+                printf("\nErro: Tipo de sistema invalido!\n");
                 return 1;
             }
 
             if (fp < 0.1 || fp > 1.0)
             {
-                printf("\nError: Power factor out of range!\n");
+                printf("\nErro: Fator de potencia fora da faixa!\n");
                 return 1;
             }
 
             if (tipo_carga < 1 || tipo_carga > 3)
             {
-                printf("\nError: Invalid load type selection!\n");
+                printf("\nErro: seleçao de tipo de carregamento invalida!\n");
                 return 1;
             }
 
-            // Executar cálculos
+            // Calculation
             double corrente;
             char tipo_disjuntor[20];
-            int disjuntor = calcular_disjuntor(fase, tensao, potencia, fp, tipo_carga,
-                                               carga_continua, &corrente, tipo_disjuntor);
+            int disjuntor = calcular_disjuntor(fase, tensao, potencia, fp, tipo_carga, carga_continua, &corrente, tipo_disjuntor);
 
-            // Exibir resultados
-            printf("\n=== Sizing Results ===\n");
-            printf("Calculated current: %.2fA\n", corrente);
+            // Display results
+            printf("\n=== Resultados de dimensionamento===\n");
+            printf("%-20s: %.2fA\n", "Corrente calculada", corrente);
 
             if (disjuntor == -1)
             {
-                printf("Error: Invalid load type in calculations\n");
+                printf("Erro: tipo de carga invalido nos calculos\n");
                 return 1;
             }
             else if (disjuntor == -2)
             {
-                printf("Recommended breaker: >200A (consult specialist)\n");
+                printf("Disjuntor recomendado: >200A (consultar especialista)\n");
             }
             else
             {
-                printf("Recommended breaker: %dA\n", disjuntor);
+                printf("%-20s: %dA\n", "Disjuntor recomendado", disjuntor);
             }
 
-            printf("Breaker type: %s\n", tipo_disjuntor);
+            printf("%-20s: %s\n", "Tipo de disjuntor", tipo_disjuntor);
 
-            // Notas finais
-            printf("\nImportant notes:\n");
-            printf("- Always verify local electrical regulations\n");
-            printf("- Consider ambient temperature and cable sizing\n");
-            printf("- For motors, verify starting current requirements\n");
-            printf("- Consult a qualified electrician for critical installations\n");
+            // Final notes
+            printf("\nObservaçoes importantes:\n");
+            printf("- Verifique sempre as regulamentaçoes eletricas locais\n");
+            printf("- Considere a temperatura ambiente e o dimensionamento do cabo\n");
+            printf("- Para motores, verifique os requisitos de corrente de partida\n");
+            printf("- Consultar um eletricista qualificado para instalaçoes criticas\n");
 
             break;
         }
 
         case 8:
         {
-            printf("----- Cable Sizing -----\n");
-            float corrente, comprimento, tensao, queda_tensao_permitida;
+            printf("----- Calculadora de dimensionamento de cabos (IEC 60228) -----\n\n");
+
+            double corrente, comprimento, tensao, queda_tensao_permitida;
             int material;
 
-            // User input
-            printf("Enter current (A): ");
-            scanf("%f", &corrente);
-            printf("Enter cable length (m): ");
-            scanf("%f", &comprimento);
-            printf("Enter system voltage (V): ");
-            scanf("%f", &tensao);
-            printf("Enter allowable voltage drop (V): ");
-            scanf("%f", &queda_tensao_permitida);
-            printf("Select conductor material (1 for Copper, 2 for Aluminum): ");
-            scanf("%d", &material);
-
-            float tamanho_padrao;
-            float tamanho_requerido = calcular_tamanho_cabo(corrente, comprimento, queda_tensao_permitida, material, &tamanho_padrao);
-
-            printf("\nCalculated required cable size: %.2f mm2\n", tamanho_requerido);
-
-            if (tamanho_padrao == -1)
+            // User input with validation
+            printf("Digite a corrente (A): ");
+            if (scanf("%lf", &corrente) != 1 || corrente <= 0)
             {
-                printf("No suitable IEC 60228 standard cable size found.\n");
+                printf("Entrada invalida. O atual deve ser um numero positivo.\n");
+                return 1;
+            }
+
+            printf("Insira o comprimento do cabo (m): ");
+            if (scanf("%lf", &comprimento) != 1 || comprimento <= 0)
+            {
+                printf("Entrada invalida. O comprimento deve ser um numero positivo.\n");
+                return 1;
+            }
+
+            printf("Insira a tensao do sistema (V): ");
+            if (scanf("%lf", &tensao) != 1 || tensao <= 0)
+            {
+                printf("Entrada invalida. A tensao deve ser um numero positivo\n");
+                return 1;
+            }
+
+            printf("Insira a queda de tensao permitida (V): ");
+            if (scanf("%lf", &queda_tensao_permitida) != 1 || queda_tensao_permitida <= 0 || queda_tensao_permitida > tensao)
+            {
+                printf("Entrada invalida. A queda de tensao deve ser positiva e menor que a tensao do sistema.\n");
+                return 1;
+            }
+
+            printf("Selecione o material do condutor (1 para cobre, 2 para aluminio): ");
+            if (scanf("%d", &material) != 1 || (material != 1 && material != 2))
+            {
+                printf("Entrada invalida. Insira 1 para cobre ou 2 para aluminio.\n");
+                return 1;
+            }
+
+            double tamanho_padrao;
+            double tamanho_requerido = calcular_tamanho_cabo(corrente, comprimento, queda_tensao_permitida, material, &tamanho_padrao);
+
+            printf("\nTamanho do cabo necessario calculado: %.2f mm2\n", tamanho_requerido);
+
+            if (tamanho_padrao == tamanhos_padrao[num_tamanhos - 1])
+            {
+                printf("Aviso: Nenhuma correspondencia exata encontrada. Usando o maior tamanho de cabo padrao disponivel: %.2f mm2\n", tamanho_padrao);
             }
             else
             {
-                printf("Recommended IEC 60228 standard cable size: %.2f mm2\n", tamanho_padrao);
+                printf("Tamanho de cabo padrao IEC 60228 recomendado: %.2f mm2\n", tamanho_padrao);
             }
 
             break;
         }
 
         default:
-            printf("Invalid option.\n");
+            printf("Opçao invalida.\n");
             break;
         }
 
