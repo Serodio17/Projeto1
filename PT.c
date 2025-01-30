@@ -444,7 +444,7 @@ int main()
     do
     {
         // Menu em Portugues
-        printf("\n-------- MENU IN ENGLISH -------- \n");
+        printf("\n-------- MENU EM PORTUGUES -------- \n");
         printf("1- Calcular resistencias em serie ou paralelo \n");
         printf("2- Descobrir valores de resistencia atraves do codigo de cores \n");
         printf("3- Descubra o codigo de cor atraves de resistencias \n");
