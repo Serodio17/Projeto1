@@ -461,7 +461,7 @@ int main()
         printf("Digite a condutividade do material (em S/m): ");
         scanf("%lf", &condutividade);
 
-        printf("Digite a variação de temperatura permitida (em °C): ");
+        printf("Digite a variação de temperatura permitida (em C): ");
         scanf("%lf", &deltaT);
 
         seccao = calcularSeccao(corrente, comprimento, condutividade, deltaT);

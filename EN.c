@@ -7,10 +7,20 @@ double calcularSeccao(double corrente, double comprimento, double condutividade,
 {
     return (corrente * comprimento) / (condutividade * deltaT);
 }
-
+// Helper function to convert string to lowercase
+void toLowercase(char *str)
+{
+    for (int i = 0; str[i]; i++)
+    {
+        str[i] = tolower(str[i]);
+    }
+}
 // Função para obter o valor da cor
 int obterValorCor(char cor[])
 {
+    // Convert input color to lowercase for case-insensitive comparison
+    toLowercase(cor);
+
     if (strcmp(cor, "black") == 0)
         return 0;
     if (strcmp(cor, "brown") == 0)
@@ -31,15 +41,33 @@ int obterValorCor(char cor[])
         return 8;
     if (strcmp(cor, "white") == 0)
         return 9;
-    return -1; // Cor inválida
+
+    return -1; // Invalid color
 }
 
 // Função para obter o código de cores de uma resistência
 void obterCodigoCores(long resistencia, char codigo[4][20])
 {
-    int digito1 = resistencia / 10;
-    int digito2 = resistencia % 10;
-    int multiplicador = log10(resistencia) - 1;
+    if (resistencia <= 0)
+    {
+        printf("Invalid resistance value. It must be positive.\n");
+        return;
+    }
+
+    int num_digits = log10(resistencia) + 1;
+
+    if (num_digits < 2 || num_digits > 6)
+    {
+        printf("Resistance value out of range for standard color codes.\n");
+        return;
+    }
+
+    // Extract first and second digits
+    int digito1 = (resistencia / (long)pow(10, num_digits - 1)) % 10; // First digit
+    int digito2 = (resistencia / (long)pow(10, num_digits - 2)) % 10; // Second digit
+
+    // Multiplier
+    int multiplicador = num_digits - 2;
 
     char cores[10][20] = {
         "black", "brown", "red", "orange",
@@ -151,53 +179,74 @@ void leiDosNos()
 // Desenhaar Onda sinosoidal
 #define PI 3.14159265358979323846
 
-void desenhar_onda_senoidal(float frequencia, float amplitude, int largura_terminal)
+void generate_oscilloscope_wave_svg(float frequency, float amplitude, const char *file_name)
 {
-    int linhas = 21;                     // Número de linhas para representar a amplitude
-    int eixo_central = linhas / 2;       // Linha central representando o eixo X
-    char tela[linhas][largura_terminal]; // Matriz para armazenar o desenho da onda
+    int width = 800;         // Fixed width of the SVG
+    int height = 400;        // Height of the SVG
+    int center_axis = height / 2;
+    float period = 1.0 / frequency;   // Calculate the period from the frequency
+    float total_time = 2 * period;    // Display 2 full cycles
+    float time_step = total_time / width; // Time increment for each pixel
+    float wave_step = (2 * PI) / period; // Angular increment based on frequency
+    int grid_spacing = 50;    // Spacing between grid lines in pixels
 
-    // Inicializar a matriz com espaços
-    for (int i = 0; i < linhas; i++)
+    // Calculate grid sizes
+    float grid_size_ms = (float)grid_spacing / width * total_time * 1000;  // Horizontal grid size in ms
+    float grid_size_volts = (float)grid_spacing / height * amplitude;  // Vertical grid size in volts
+
+    // Open the SVG file for writing
+    FILE *file = fopen(file_name, "w");
+    if (file == NULL)
     {
-        for (int j = 0; j < largura_terminal; j++)
-        {
-            tela[i][j] = ' ';
-        }
+        printf("Error opening the file for writing.\n");
+        return;
     }
 
-    // Desenhar o eixo X
-    for (int j = 0; j < largura_terminal; j++)
+    // SVG header
+    fprintf(file, "<svg xmlns='http://www.w3.org/2000/svg' width='%d' height='%d' viewBox='0 0 %d %d'>\n", width, height, width, height);
+    fprintf(file, "<rect width='100%%' height='100%%' fill='white' />\n");
+
+    // Draw grid lines
+    for (int x = 0; x <= width; x += grid_spacing)
     {
-        tela[eixo_central][j] = '-';
+        fprintf(file, "<line x1='%d' y1='0' x2='%d' y2='%d' stroke='lightgray' stroke-width='1' />\n", x, x, height);
+    }
+    for (int y = 0; y <= height; y += grid_spacing)
+    {
+        fprintf(file, "<line x1='0' y1='%d' x2='%d' y2='%d' stroke='lightgray' stroke-width='1' />\n", y, width, y);
     }
 
-    // Ajustar frequência para caber no terminal
-    float ciclos_visiveis = 2; // Exibir 2 ciclos completos
-    float passo = (2 * PI * ciclos_visiveis) / largura_terminal;
+    // Draw the X-axis (time) and Y-axis (voltage)
+    fprintf(file, "<line x1='0' y1='%d' x2='%d' y2='%d' stroke='black' stroke-width='1' />\n", center_axis, width, center_axis); // X-axis
+    fprintf(file, "<line x1='%d' y1='0' x2='%d' y2='%d' stroke='black' stroke-width='1' />\n", width / 2, width / 2, height);     // Y-axis
 
-    // Gerar a onda senoidal
-    for (int x = 0; x < largura_terminal; x++)
+    // Axis labels
+    fprintf(file, "<text x='%d' y='%d' font-size='12' fill='black'>0ms</text>\n", width / 2 + 5, center_axis - 5);
+    fprintf(file, "<text x='%d' y='%d' font-size='12' fill='black'>Peak Voltage - %.1fV</text>\n", width / 2 + 5, 15, amplitude);  // Display peak voltage as "Peak Voltage - X V"
+
+    fprintf(file, "<text x='%d' y='%d' font-size='12' fill='black'>-%.1fms</text>\n", 10, center_axis - 5, total_time * 500);
+    fprintf(file, "<text x='%d' y='%d' font-size='12' fill='black'>+%.1fms</text>\n", width - 50, center_axis - 5, total_time * 500);
+
+    // Grid square size labels
+    fprintf(file, "<text x='%d' y='%d' font-size='12' fill='black'>Grid square size: %0.2fms</text>\n", 10, height - 40, grid_size_ms);
+    fprintf(file, "<text x='%d' y='%d' font-size='12' fill='black'>Grid square size: %0.2fV</text>\n", 10, height - 20, grid_size_volts);
+
+    // Generate wave points
+    fprintf(file, "<polyline fill='none' stroke='blue' stroke-width='2' points='");
+    for (int x = 0; x < width; x++)
     {
-        float valor = amplitude * sin(passo * x);                                 // Calcular valor da função seno
-        int linha = eixo_central - (int)((valor * (linhas / 2 - 1)) / amplitude); // Mapear valor para a linha
-
-        // Garantir que o ponto da onda esteja dentro dos limites
-        if (linha >= 0 && linha < linhas)
-        {
-            tela[linha][x] = '*';
-        }
+        float current_time = time_step * x - (total_time / 2); // Time relative to center
+        float value = amplitude * sin(wave_step * current_time); // Voltage value
+        int y = center_axis - (int)((value * (height / 2 - 20)) / amplitude); // Map value to SVG height
+        fprintf(file, "%d,%d ", x, y);
     }
+    fprintf(file, "' />\n");
 
-    // Imprimir a matriz no terminal
-    for (int i = 0; i < linhas; i++)
-    {
-        for (int j = 0; j < largura_terminal; j++)
-        {
-            printf("%c", tela[i][j]);
-        }
-        printf("\n");
-    }
+    // Close the SVG file
+    fprintf(file, "</svg>\n");
+    fclose(file);
+
+    printf("SVG file '%s' successfully generated.\n", file_name);
 }
 
 // Main function
@@ -212,10 +261,10 @@ int main()
     printf("3- Discover color code through resistors \n");
     printf("4- Law of Meshes and Nodes\n");
     printf("5- Norton and Thevenin theorem\n");
-    printf("6- wave generator \n");
+    printf("6- Wave generator \n");
     printf("7- Dimensioning circuit breaker\n");
     printf("8- Dimensioning electrical cable section\n");
-    printf("Choose an optiono: ");
+    printf("Choose an option: ");
     scanf("%d", &opcaoPortugues);
 
     switch (opcaoPortugues)
@@ -355,45 +404,17 @@ int main()
 
     case 6:
     {
-        printf("----- Wave generator -----\n");
-        // Implementação específica deve ser feita aqui
-        float frequencia, amplitude;
-        int largura_terminal;
+        float frequency, amplitude;
 
-        printf("----- Sine wave generator -----\n");
-        printf("Enter the frequency of the wave (Hz, up to 1000 kHz): ");
-        scanf("%f", &frequencia);
-        printf("Enter the wave amplitude (V, up to 220 V): ");
+        printf("Welcome to the oscilloscope simulator!\n");
+        printf("Enter the frequency of the wave (Hz, e.g., 50): ");
+        scanf("%f", &frequency);
+        printf("Enter the amplitude of the wave (Volts, e.g., 5.0): ");
         scanf("%f", &amplitude);
-        printf("Enter the width of the terminal (number of columns): ");
-        scanf("%d", &largura_terminal);
 
-        // Limitar frequência e amplitude para valores máximos
-        if (frequencia > 1000000.0)
-        {
-            printf("The maximum allowed frequency is 1000 kHz. Adjusting to 1000 kHz.\n");
-            frequencia = 1000000.0;
-        }
-        if (amplitude > 220.0)
-        {
-            printf("The maximum permissible amplitude is 220 V. Adjusting for 220 V.\n");
-            amplitude = 220.0;
-        }
-        if (largura_terminal < 20)
-        {
-            printf("The minimum width of the terminal is 20. Setting to 20.\n");
-            largura_terminal = 20;
-        }
+        generate_oscilloscope_wave_svg(frequency, amplitude, "oscilloscope.svg");
 
-        // Ajustar a frequência para visualização se muito alta
-        if (frequencia > 10.0)
-        {
-            printf("Very high frequency! Reducing to visual scale.\n");
-            frequencia = 10.0; // Escala a frequência para ser legível
-        }
-
-        desenhar_onda_senoidal(frequencia, amplitude, largura_terminal);
-
+        printf("Open the file 'oscilloscope.svg' in your browser to view the wave.\n");
         break;
     }
 
@@ -461,12 +482,12 @@ int main()
         printf("Enter the conductivity of the material (in S/m): ");
         scanf("%lf", &condutividade);
 
-        printf("Enter the allowed temperature variation (in °C):: ");
+        printf("Enter the allowed temperature variation (in C):: ");
         scanf("%lf", &deltaT);
 
         seccao = calcularSeccao(corrente, comprimento, condutividade, deltaT);
 
-        printf("The required cable section is: %.2f mm²\n", seccao);
+        printf("The required cable section is: %.2f mm2\n", seccao);
 
         break;
     }
@@ -478,4 +499,3 @@ int main()
 
     return 0;
 }
-
