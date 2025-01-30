@@ -637,7 +637,7 @@ int main()
 
             if (tamanho_padrao == -1)
             {
-                printf("No suitable standard cable size found.\n");
+                printf("No suitable IEC 60228 standard cable size found.\n");
             }
             else
             {
