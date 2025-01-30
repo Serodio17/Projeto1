@@ -43,25 +43,25 @@ int obterValorCor(char cor[])
     // Convert input color to lowercase for case-insensitive comparison
     toLowercase(cor);
 
-    if (strcmp(cor, "black") == 0)
+    if (strcmp(cor, "preto") == 0)
         return 0;
-    if (strcmp(cor, "brown") == 0)
+    if (strcmp(cor, "castanho") == 0)
         return 1;
-    if (strcmp(cor, "red") == 0)
+    if (strcmp(cor, "vermelho") == 0)
         return 2;
-    if (strcmp(cor, "orange") == 0)
+    if (strcmp(cor, "laranja") == 0)
         return 3;
-    if (strcmp(cor, "yellow") == 0)
+    if (strcmp(cor, "amarelo") == 0)
         return 4;
-    if (strcmp(cor, "green") == 0)
+    if (strcmp(cor, "verde") == 0)
         return 5;
-    if (strcmp(cor, "blue") == 0)
+    if (strcmp(cor, "azul") == 0)
         return 6;
-    if (strcmp(cor, "purple") == 0)
+    if (strcmp(cor, "violeta") == 0)
         return 7;
-    if (strcmp(cor, "grey") == 0)
+    if (strcmp(cor, "cinza") == 0)
         return 8;
-    if (strcmp(cor, "white") == 0)
+    if (strcmp(cor, "branco") == 0)
         return 9;
 
     return -1; // Invalid color
