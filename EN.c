@@ -2,17 +2,17 @@
 #include <string.h>
 #include <math.h>
 
-#define RESISTIVIDADE_COBRE 0.0172    // Ω·mm²/m
-#define RESISTIVIDADE_ALUMINIO 0.0282 // Ω·mm²/m
+#define RESISTIVIDADE_COBRE 0.0172    // Ω·mm2/m
+#define RESISTIVIDADE_ALUMINIO 0.0282 // Ω·mm2/m
 
-// Standard cable sizes in mm²
+// Standard cable sizes in mm2
 double tamanhos_padrao[] = {0.5, 0.75, 1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630, 800, 1000, 1200, 1400, 1600, 1800, 2000, 2500};
 int num_tamanhos = sizeof(tamanhos_padrao) / sizeof(tamanhos_padrao[0]);
 
 double calcular_tamanho_cabo(double corrente, double comprimento, double queda_tensao_permitida, int material, double *tamanho_padrao)
 {
     double resistividade = (material == 1) ? RESISTIVIDADE_COBRE : RESISTIVIDADE_ALUMINIO;
-    double tamanho_requerido = (2 * resistividade * comprimento * corrente) / queda_tensao_permitida; // mm²
+    double tamanho_requerido = (2 * resistividade * comprimento * corrente) / queda_tensao_permitida; // mm2
 
     // Find the smallest standard cable size that meets the requirement
     for (int i = 0; i < num_tamanhos; i++)
@@ -819,15 +819,15 @@ int main()
             double tamanho_padrao;
             double tamanho_requerido = calcular_tamanho_cabo(corrente, comprimento, queda_tensao_permitida, material, &tamanho_padrao);
 
-            printf("\nCalculated required cable size: %.2f mm²\n", tamanho_requerido);
+            printf("\nCalculated required cable size: %.2f mm2\n", tamanho_requerido);
 
             if (tamanho_padrao == tamanhos_padrao[num_tamanhos - 1])
             {
-                printf("Warning: No exact match found. Using largest available standard cable size: %.2f mm²\n", tamanho_padrao);
+                printf("Warning: No exact match found. Using largest available standard cable size: %.2f mm2\n", tamanho_padrao);
             }
             else
             {
-                printf("Recommended IEC 60228 standard cable size: %.2f mm²\n", tamanho_padrao);
+                printf("Recommended IEC 60228 standard cable size: %.2f mm2\n", tamanho_padrao);
             }
 
             break;
