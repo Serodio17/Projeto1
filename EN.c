@@ -407,7 +407,7 @@ int calcular_disjuntor(int fase, double tensao, double potencia, double fp,
             return tamanhos[i];
         }
     }
-    return -2; // Above 200A
+    return -2; // Above 6300A
 }
 
 // Function to calculate Thevenin equivalent voltage and resistance
@@ -754,7 +754,7 @@ int main()
             }
             else if (disjuntor == -2)
             {
-                printf("Recommended breaker: >200A (consult specialist)\n");
+                printf("Recommended breaker: >6300A (consult specialist)\n");
             }
             else
             {
